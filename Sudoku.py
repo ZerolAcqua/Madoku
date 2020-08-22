@@ -12,10 +12,14 @@ class Sudoku_scene(Scene):
         'scale': 0.35,  # 格子的比例
     }
 
-    grid_group = VGroup()
-    line_group = VGroup()  ##存放宫线
-    num_group = VGroup()
     num_check = False  # 盘面是否有数字
+    cand_check = False  # 是否使用候选数
+
+    line_group = VGroup()  # 存放宫线
+    grid_group = VGroup()  # 网格汇总
+    num_group = VGroup()  # 已知数
+    cand_group = VGroup()  # 候选数
+    sudoku_group = VGroup()  # 数独盘面
 
     square_list = []  # 存放格子
     row_list = []  # 存放行
@@ -23,9 +27,10 @@ class Sudoku_scene(Scene):
     box_list = []  # 存放宫
     line_list = []  # 存放宫线
     note_list = []  # 存放标记
-    sudoku_group = VGroup()  # 数独盘面
+    cand_list = []  # 存放81个格子对应的候选数
 
-    def create_board(self, file_name=None):
+    def create_board(self, file_name=None, cand_check=False):
+        self.cand_check = cand_check
         ## 行
         for i in range(9):
             row_group = VGroup()
@@ -100,8 +105,77 @@ class Sudoku_scene(Scene):
 
         self.sudoku_group = VGroup(self.grid_group, self.line_group, self.num_group)
 
+        if (cand_check):
+            self.cand_mark()
+
     ## 函数部分
-    ## 填入数字，row和col从0起算
+
+    ## 候选数
+    ## 使用候选数
+    def cand_mark(self):
+        rate = 2 / 3 - 0.1
+        for i in range(81):
+            tmp = self.square_list[i].get_center()
+            cand_num_list = []  # 存放一个格子对应的候选数
+            num = 1
+            for j in [1, 0, -1]:
+                for k in [-1, 0, 1]:
+                    num_text = TextMobject("%d" % num)
+                    num_text.set_color(self.solve_color)
+                    num_text.set_opacity(0)
+                    num_text.scale(self.scale * 1.3)
+                    num_text.shift(tmp + rate * j * self.scale * UP + rate * k * self.scale * RIGHT)
+                    self.cand_group.add(num_text)
+                    cand_num_list.append(num_text)
+                    num += 1
+            self.cand_list.append(cand_num_list)
+        self.sudoku_group.add(self.cand_group)
+
+    ## 设置并显示该格候选数
+    def set_show_cand(self, row, col, array):
+        if (self.cand_check == False):
+            return
+        tmp = VGroup()
+        length = len(array)
+        if (length > 9):
+            length = 9
+        for i in range(length):
+            if (array[i]):
+                self.cand_list[row * 9 + col][i].set_opacity(1)
+                tmp.add(self.cand_list[row * 9 + col][i])
+        self.play(Write(tmp))
+
+    ## 设置候选数
+    def set_cand(self, row, col, array):
+        if (self.cand_check == False):
+            return
+        length = len(array)
+        if (length > 9):
+            length = 9
+        for i in range(length):
+            if (array[i]):
+                self.cand_list[row * 9 + col][i].set_opacity(1)
+
+    ## 显示全部候选数
+    def show_cand(self):
+        self.play(Write(self.cand_group))
+
+    ## 清除候选数
+    def reset_cand(self):
+        self.play(ApplyMethod(self.cand_group.set_opacity, 0))
+
+    ## 删除某个候选数
+    ## 注意候选数和num是一样的，row和col与盘面是差一的
+    def del_cand(self, row, col, num):
+        self.play(ApplyMethod(self.cand_list[row * 9 + col][num - 1].set_opacity, 0))
+
+    ## 添加某个候选数
+    ## 注意候选数和num是一样的，row和col与盘面是差一的
+    def add_cand(self, row, col, num):
+        self.play(ApplyMethod(self.cand_list[row * 9 + col][num - 1].set_opacity, 1))
+
+    ## 解题
+    ## 填入数字 row和col从0起算
     def solve(self, row, col, num):
         num_text = TextMobject("%d" % num, color=self.solve_color)
         num_text.shift(self.square_list[row * 9 + col].get_center())
@@ -156,7 +230,7 @@ class Sudoku_scene(Scene):
         note_group.add(line)
         self.note_list.append((note_group))
 
-    def show(self):
+    def show_note(self):
         tmp = VGroup()
         for i in range(len(self.note_list)):
             tmp.add(self.note_list[i])
@@ -164,7 +238,7 @@ class Sudoku_scene(Scene):
         self.note_list.clear()
         self.note_list.append(tmp)
 
-    def erase(self):
+    def erase_note(self):
         for i in range(len(self.note_list)):
             self.play(FadeOut(self.note_list[i]))
         self.note_list.clear()
@@ -173,6 +247,9 @@ class Sudoku_scene(Scene):
 class Sudoku_start(Sudoku_scene):
     def construct(self):
         ## 设置物体
+
+        ## 盘面
+        self.create_board("test.txt", False)
 
         ## 文字
         introdution = TextMobject("一、认识数独盘面", tex_to_color_map={"数独": self.board_color})
@@ -208,9 +285,6 @@ class Sudoku_start(Sudoku_scene):
         row_text = TextMobject("行", tex_to_color_map={"行": self.row_color})
         col_text = TextMobject("列", tex_to_color_map={"列": self.col_color})
         box_text = TextMobject("宫", tex_to_color_map={"宫": self.box_color})
-
-        ## 盘面
-        self.create_board("test.txt")
 
         ## 控制位置
         introdution.to_edge(UP)
@@ -323,9 +397,9 @@ class Sudoku_start(Sudoku_scene):
         self.wait(1)
         self.play(Transform(explain_text05, explain_text08))
         self.note(7, 8, 1, 0)
-        self.show()
+        self.show_note()
         self.solve(6, 1, 1)
-        self.erase()
+        self.erase_note()
         self.wait(1)
         self.play(FadeOut(explain_text05))
 
@@ -335,9 +409,9 @@ class Sudoku_start(Sudoku_scene):
         self.note(7, 7, 2, 1)
         self.note(1, 6, 2, 0)
         self.note(5, 0, 1, 1)
-        self.show()
+        self.show_note()
         self.solve(4, 8, 7)
-        self.erase()
+        self.erase_note()
 
         self.wait(1)
         self.play(Transform(explain_text09, explain_text10))
@@ -345,26 +419,26 @@ class Sudoku_start(Sudoku_scene):
         self.solve(7, 1, 9)
 
         self.note(8, 0, 1, 1)
-        self.show()
+        self.show_note()
         self.box_highlight(8)
         self.solve(6, 7, 8)
-        self.erase()
+        self.erase_note()
 
         self.solve(8, 7, 9)
 
         self.note(4, 3, 1, 1)
-        self.show()
+        self.show_note()
         self.col_highlight(6)
         self.solve(5, 6, 8)
-        self.erase()
+        self.erase_note()
 
         self.solve(4, 6, 9)
 
         self.note(4, 4, 1, 1)
-        self.show()
+        self.show_note()
         self.box_highlight(5)
         self.solve(5, 8, 3)
-        self.erase()
+        self.erase_note()
 
         self.solve(4, 7, 4)
 
@@ -373,15 +447,15 @@ class Sudoku_start(Sudoku_scene):
 
         self.note(0, 1, 2, 0)
         self.note(6, 0, 2, 1)
-        self.show()
+        self.show_note()
         self.box_highlight(3)
         self.solve(4, 2, 6)
-        self.erase()
+        self.erase_note()
 
         self.note(1, 0, 2, 0)
-        self.show()
+        self.show_note()
         self.solve(4, 1, 2)
-        self.erase()
+        self.erase_note()
 
         self.solve(4, 0, 1)
 
@@ -395,88 +469,88 @@ class Sudoku_start(Sudoku_scene):
         self.solve(0, 2, 9)
 
         self.note(1, 1, 1, 1)
-        self.show()
+        self.show_note()
         self.col_highlight(7)
         self.solve(2, 7, 5)
-        self.erase()
+        self.erase_note()
 
         self.solve(1, 7, 1)
 
         self.note(3, 5, 2, 1)
         self.note(4, 5, 2, 1)
-        self.show()
+        self.show_note()
         self.row_highlight(0)
         self.solve(0, 5, 1)
-        self.erase()
+        self.erase_note()
 
         self.note(0, 5, 2, 0)
         self.note(4, 5, 2, 0)
-        self.show()
+        self.show_note()
         self.row_highlight(8)
         self.solve(8, 5, 2)
-        self.erase()
+        self.erase_note()
 
         self.note(5, 3, 2, 0)
-        self.show()
+        self.show_note()
         self.row_highlight(8)
         self.solve(8, 4, 1)
-        self.erase()
+        self.erase_note()
 
         self.solve(8, 3, 5)
 
         self.note(8, 3, 2, 1)
-        self.show()
+        self.show_note()
         self.row_highlight(0)
         self.solve(0, 4, 5)
-        self.erase()
+        self.erase_note()
 
         self.solve(0, 3, 7)
 
         self.note(0, 3, 2, 0)
-        self.show()
+        self.show_note()
         self.row_highlight(6)
         self.solve(6, 4, 7)
-        self.erase()
+        self.erase_note()
 
         self.solve(6, 3, 9)
 
         self.note(3, 3, 2, 1)
         self.note(8, 5, 2, 1)
         self.note(1, 0, 1, 1)
-        self.show()
+        self.show_note()
         self.box_highlight(1)
         self.solve(2, 4, 2)
-        self.erase()
+        self.erase_note()
 
         self.note(1, 2, 1, 1)
-        self.show()
+        self.show_note()
         self.col_highlight(4)
         self.solve(7, 4, 8)
-        self.erase()
+        self.erase_note()
 
         self.solve(1, 4, 9)
 
         self.note(1, 4, 1, 1)
-        self.show()
+        self.show_note()
         self.col_highlight(8)
         self.solve(2, 8, 9)
-        self.erase()
+        self.erase_note()
 
         self.solve(1, 8, 4)
 
         self.note(4, 3, 2, 1)
-        self.show()
+        self.show_note()
         self.row_highlight(2)
         self.solve(2, 5, 8)
-        self.erase()
+        self.erase_note()
 
         self.solve(2, 3, 4)
 
         self.note(1, 8, 1, 0)
-        self.show()
+        self.show_note()
         self.col_highlight(5)
         self.solve(7, 5, 4)
-        self.erase()
+        self.erase_note()
 
         self.solve(1, 5, 6)
 
