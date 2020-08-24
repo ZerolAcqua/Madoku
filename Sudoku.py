@@ -27,6 +27,7 @@ class Sudoku_scene(Scene):
     box_list = []  # 存放宫
     line_list = []  # 存放宫线
     note_list = []  # 存放标记
+    highlight_list = []  # 存放强调格子
     cand_list = []  # 存放81个格子对应的候选数
 
     def create_board(self, file_name=None, cand_check=False):
@@ -107,8 +108,35 @@ class Sudoku_scene(Scene):
 
         if (cand_check):
             self.cand_mark()
+            self.sudoku_group.add(self.cand_group)
 
     ## 函数部分
+
+    ## 初始数字
+    ## 设置初始数字
+    def init_num(self, file_name):
+        if (file_name == None or self.num_check == True):
+            return
+        with open(file_name, 'r') as f1:
+            data = f1.readline()
+            for i in range(81):
+                if (data[i] != '.'):
+                    num_text = TextMobject(data[i])
+                    num_text.set_color(self.board_color)
+                    num_text.shift(self.square_list[i].get_center())
+                    self.num_group.add(num_text)
+            self.num_check = True
+
+    ## 清除数字
+    def clear_num(self):
+        if (self.num_check == True):
+            self.play(Uncreate(self.num_group))
+            self.num_check = False
+
+    ## 更改数字
+    def change_num(self, file_name):
+        self.clear_num()
+        self.init_num(file_name)
 
     ## 候选数
     ## 使用候选数
@@ -129,7 +157,6 @@ class Sudoku_scene(Scene):
                     cand_num_list.append(num_text)
                     num += 1
             self.cand_list.append(cand_num_list)
-        self.sudoku_group.add(self.cand_group)
 
     ## 设置并显示该格候选数
     def set_show_cand(self, row, col, array):
@@ -174,13 +201,44 @@ class Sudoku_scene(Scene):
     def add_cand(self, row, col, num):
         self.play(ApplyMethod(self.cand_list[row * 9 + col][num - 1].set_opacity, 1))
 
-    ## 解题
+    ## 解题&讲解&标注&强调
+
     ## 填入数字 row和col从0起算
     def solve(self, row, col, num):
         num_text = TextMobject("%d" % num, color=self.solve_color)
         num_text.shift(self.square_list[row * 9 + col].get_center())
         self.num_group.add(num_text)
         self.play(Write(num_text))
+
+    ## 强调候选数或者是特定格子，如果num是0，强调此格子
+    ## 录入
+    def add_num_highlight(self, row, col, num=0):
+        if (num <= 0):
+            tmp = self.square_list[row * 9 + col].copy()
+            tmp.set_color(PURPLE)
+            self.highlight_list.append(tmp)
+        elif (num <= 9 and self.cand_check == True):
+            cen = self.cand_list[row * 9 + col][num - 1].get_center()
+            tmp = Square(color=PURPLE)
+            tmp.scale((1 / 3 - 0.1) * self.scale)
+            tmp.shift(cen)
+            self.highlight_list.append(tmp)
+
+    ## 展示
+    def show_num_highlight(self):
+        tmp = VGroup()
+        for i in range(len(self.highlight_list)):
+            tmp.add(self.highlight_list[i])
+        self.highlight_list.clear()
+        self.play(ApplyMethod(tmp.set_opacity, 0.7))
+
+        self.highlight_list.append(tmp)
+
+    ## 清除
+    def erase_num_highlight(self):
+        for i in range(len(self.highlight_list)):
+            self.play(ApplyMethod(self.highlight_list[i].set_opacity, 0))
+        self.highlight_list.clear()
 
     ## 强调
     ## 填入数字，row\col\box从0起算
@@ -249,7 +307,7 @@ class Sudoku_start(Sudoku_scene):
         ## 设置物体
 
         ## 盘面
-        self.create_board("test.txt", False)
+        self.create_board("test.txt", True)
 
         ## 文字
         introdution = TextMobject("一、认识数独盘面", tex_to_color_map={"数独": self.board_color})
