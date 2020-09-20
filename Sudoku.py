@@ -29,6 +29,7 @@ class Sudoku_scene(Scene):
     note_list = []  # 存放标记
     highlight_list = []  # 存放强调格子
     cand_list = []  # 存放81个格子对应的候选数
+    cand_del_list = []  # 存放被删掉的候选数
 
     def create_board(self, file_name=None, cand_check=False):
         self.cand_check = cand_check
@@ -147,6 +148,8 @@ class Sudoku_scene(Scene):
 
     ## 清除数字
     def clear_num(self):
+        if (self.cand_check == True):
+            self.reset_cand()
         if (self.num_check == True):
             self.play(Uncreate(self.num_group))
             self.num_check = False
@@ -179,45 +182,74 @@ class Sudoku_scene(Scene):
 
     ## 设置并显示该格候选数
     def set_show_cand(self, row, col, array):
-        if (self.cand_check == False):
-            return
-        tmp = VGroup()
-        length = len(array)
-        if (length > 9):
-            length = 9
-        for i in range(length):
-            if (array[i]):
-                self.cand_list[row * 9 + col][i].set_opacity(1)
-                tmp.add(self.cand_list[row * 9 + col][i])
+        tmp = self.set_cand(row, col, array)
         self.play(Write(tmp))
 
     ## 设置候选数
+    def load_cand(self, file_name):
+        if (file_name == None or self.cand_check == False):
+            return
+        with open(file_name, 'r') as f1:
+            for data in f1.readlines():
+                tmp_list = list(data.strip('\n'))
+                tmp_list = list(map(int, tmp_list))
+                row = tmp_list[0]
+                col = tmp_list[1]
+                array = tmp_list[2:]
+                self.set_cand(row, col, array)
+
     def set_cand(self, row, col, array):
         if (self.cand_check == False):
             return
-        length = len(array)
-        if (length > 9):
-            length = 9
-        for i in range(length):
-            if (array[i]):
-                self.cand_list[row * 9 + col][i].set_opacity(1)
+        tmp = VGroup()
+        for num in array:
+            if (num >= 1 and num <= 9):
+                self.cand_list[row * 9 + col][num - 1].set_opacity(1)
+                tmp.add(self.cand_list[row * 9 + col][num - 1])
+        return tmp
 
     ## 显示全部候选数
     def show_cand(self):
+        if (self.cand_check == False):
+            return
         self.play(Write(self.cand_group))
 
     ## 清除候选数
     def reset_cand(self):
-        self.play(ApplyMethod(self.cand_group.set_opacity, 0))
+        if (self.cand_check == True):
+            self.play(ApplyMethod(self.cand_group.set_opacity, 0))
 
     ## 删除某个候选数
     ## 注意候选数和num是一样的，row和col与盘面是差一的
-    def del_cand(self, row, col, num):
-        self.play(ApplyMethod(self.cand_list[row * 9 + col][num - 1].set_opacity, 0))
+    def del_cand(self, row, col, num, show=True):
+        if (self.cand_check == False):
+            return
+        if (show == True):
+            self.play(ApplyMethod(self.cand_list[row * 9 + col][num - 1].set_opacity, 0))
+        else:
+            self.cand_del_list.append(self.cand_list[row * 9 + col][num - 1])
+
+    def show_del_cand_then_clear(self):
+        tmp = VGroup()
+        for i in self.cand_del_list:
+            tmp.add(i)
+        self.play(ApplyMethod(tmp.set_opacity, 0))
+        self.cand_del_list.clear()
+
+    ## 删除某格的除了except_cand的候选数
+    def show_del_square_cand_then_clear(self, row, col, except_cand=0):
+        if (self.cand_check == False):
+            return
+        for i in range(1, 10):
+            if (i != except_cand):
+                self.del_cand(row, col, i, False)
+        self.show_del_cand_then_clear()
 
     ## 添加某个候选数
     ## 注意候选数和num是一样的，row和col与盘面是差一的
     def add_cand(self, row, col, num):
+        if (self.cand_check == False):
+            return
         self.play(ApplyMethod(self.cand_list[row * 9 + col][num - 1].set_opacity, 1))
 
     ## 解题&讲解&标注&强调
@@ -228,6 +260,26 @@ class Sudoku_scene(Scene):
         num_text.shift(self.square_list[row * 9 + col].get_center())
         self.num_group.add(num_text)
         self.play(Write(num_text))
+
+    ## 从候选数得到数字
+    def solve_from_cand(self, row, col, num):
+        if (self.cand_check == False):
+            self.solve(row, col, num)
+        else:
+            num_text = TextMobject("%d" % num, color=self.solve_color)
+            num_text.shift(self.square_list[row * 9 + col].get_center())
+            self.play(ReplacementTransform(self.cand_list[row * 9 + col][num - 1].copy(), num_text),
+                      ApplyMethod(self.cand_list[row * 9 + col][0].set_opacity, 0),
+                      ApplyMethod(self.cand_list[row * 9 + col][1].set_opacity, 0),
+                      ApplyMethod(self.cand_list[row * 9 + col][2].set_opacity, 0),
+                      ApplyMethod(self.cand_list[row * 9 + col][3].set_opacity, 0),
+                      ApplyMethod(self.cand_list[row * 9 + col][4].set_opacity, 0),
+                      ApplyMethod(self.cand_list[row * 9 + col][5].set_opacity, 0),
+                      ApplyMethod(self.cand_list[row * 9 + col][6].set_opacity, 0),
+                      ApplyMethod(self.cand_list[row * 9 + col][7].set_opacity, 0),
+                      ApplyMethod(self.cand_list[row * 9 + col][8].set_opacity, 0),
+                      )
+            self.num_group.add(num_text)
 
     ## 强调候选数或者是特定格子，如果num是0，强调此格子
     ## 录入
@@ -243,11 +295,12 @@ class Sudoku_scene(Scene):
             tmp.scale((1 / 3 - 0.1) * self.scale)
             tmp.shift(cen)
             self.highlight_list.append(tmp)
+
     ## 展示
     def show_num_highlight(self):
         tmp = VGroup()
-        for i in range(len(self.highlight_list)):
-            tmp.add(self.highlight_list[i])
+        for i in self.highlight_list:
+            tmp.add(i)
         self.highlight_list.clear()
         self.play(ApplyMethod(tmp.set_opacity, 0.7))
 
@@ -255,8 +308,8 @@ class Sudoku_scene(Scene):
 
     ## 清除
     def erase_num_highlight(self):
-        for i in range(len(self.highlight_list)):
-            self.play(ApplyMethod(self.highlight_list[i].set_opacity, 0))
+        for i in self.highlight_list:
+            self.play(ApplyMethod(i.set_opacity, 0))
         self.highlight_list.clear()
 
     ## 强调
@@ -311,15 +364,15 @@ class Sudoku_scene(Scene):
 
     def show_note(self):
         tmp = VGroup()
-        for i in range(len(self.note_list)):
-            tmp.add(self.note_list[i])
+        for i in self.note_list:
+            tmp.add(i)
         self.play(Write(tmp))
         self.note_list.clear()
         self.note_list.append(tmp)
 
     def erase_note(self):
-        for i in range(len(self.note_list)):
-            self.play(FadeOut(self.note_list[i]))
+        for i in self.note_list:
+            self.play(FadeOut(i))
         self.note_list.clear()
 
     def clear_note(self):
