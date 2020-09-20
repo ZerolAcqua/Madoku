@@ -36,7 +36,16 @@ class Sudoku_start(Sudoku_scene):
         explain_text10 = TextMobject("解题中…")
         explain_text11 = TextMobject("完成！")
 
-        thanks_text = TextMobject("感谢观看")
+        block_text = TextMobject("四、区块摒除")
+        block_explain01 = TextMobject("与刚才使用一个数的方法不同", tex_to_color_map={"一个数": self.board_color})
+        block_explain02 = TextMobject("我们还可以用一个区域进行排除", tex_to_color_map={"一个区域": PURPLE})
+        block_explain03 = TextMobject("第四宫的1只能出现在紫色区域里",
+                                      tex_to_color_map={"第四宫": self.box_color, "紫色": PURPLE})
+        block_explain04 = TextMobject("不论1是在哪个格子，对第六宫的效果都是一样的", tex_to_color_map={"第六宫": self.box_color})
+        block_explain05 = TextMobject("这两个格子就可以看作一个区块进行摒除", tex_to_color_map={"区块": PINK})
+        num1 = TextMobject("1")
+
+        thanks_text = TextMobject("感谢观看，未完待续……")
         name_text = TextMobject("By Zerol Acqua", tex_to_color_map={"Zerol Acqua": self.board_color})
 
         row_text = TextMobject("行", tex_to_color_map={"行": self.row_color})
@@ -62,6 +71,12 @@ class Sudoku_start(Sudoku_scene):
         explain_text09.to_edge(UP)
         explain_text10.to_edge(UP)
         explain_text11.to_edge(UP)
+        block_text.to_edge(UP)
+        block_explain01.to_edge(UP)
+        block_explain02.to_edge(UP)
+        block_explain03.to_edge(UP)
+        block_explain04.to_edge(UP)
+        block_explain05.to_edge(UP)
 
         row_text.shift(np.array([-10 * self.scale, 4 * self.scale, 0]))
         col_text.shift(np.array([2 * self.scale, 10 * self.scale, 0]))
@@ -316,45 +331,11 @@ class Sudoku_start(Sudoku_scene):
         self.play(Transform(explain_text09, explain_text11))
         self.wait(1)
         self.play(FadeOut(explain_text09))
-
-        self.play(Transform(self.sudoku_group, thanks_text))
-        self.wait(1)
-        self.play(Transform(self.sudoku_group, name_text))
-        self.wait(1)
-
-
-class Sudoku_basic(Sudoku_scene):
-    def construct(self):
-        ## 设置物体
-
-        self.create_board("test/test02.txt", False)
-        ## 盘面
-        block_text = TextMobject("一、区块摒除")
-        block_explain01 = TextMobject("与之前使用一个数的方法不同", tex_to_color_map={"一个数": self.board_color})
-        block_explain02 = TextMobject("这次我们使用一个区域进行排除", tex_to_color_map={"一个区域": PURPLE})
-        block_explain03 = TextMobject("第四宫的1只能出现在紫色区域里",
-                                      tex_to_color_map={"第四宫": self.box_color, "紫色": PURPLE})
-        block_explain04 = TextMobject("不论1是在哪个格子，对第六宫的效果都是一样的", tex_to_color_map={"第六宫": self.box_color})
-        block_explain05 = TextMobject("这两个格子就可以看作一个区块作用", tex_to_color_map={"区块": PINK})
-        num1 = TextMobject("1")
-
-        ## 位置
-
-        block_text.to_edge(UP)
-        block_explain01.to_edge(UP)
-        block_explain02.to_edge(UP)
-        block_explain03.to_edge(UP)
-        block_explain04.to_edge(UP)
-        block_explain05.to_edge(UP)
-
-        ## 动画
-
-        ## 格子
-        self.show_grid()
-        ## 数字
+        self.wait(2)
+        #################################################################################
+        self.change_num("test/test02.txt")
         self.show_num()
-        ## 标题
-        self.play(ApplyMethod(self.sudoku_group.next_to, block_text.get_edge_center(DOWN), DOWN))
+        self.wait(1)
         self.play(Write(block_text))
         self.wait(2)
         self.play(ReplacementTransform(block_text, block_explain01))
@@ -393,4 +374,115 @@ class Sudoku_basic(Sudoku_scene):
         self.add_num_highlight(5, 0)
         self.add_num_highlight(5, 2)
         self.show_num_highlight()
+        self.erase_num_highlight()
+        self.play(FadeOut(block_explain05))
+        self.wait(1)
+
+        ################################################################################
+
+        self.play(Transform(self.sudoku_group, thanks_text))
+        self.wait(1)
+        self.play(Transform(self.sudoku_group, name_text))
+        self.wait(1)
+
+
+class Sudoku_basic(Sudoku_scene):
+    def construct(self):
+        ## 设置物体
+        self.create_board("test/test03.txt", True)
+
+        ## 盘面
+        cand_text = TextMobject("一、候选数", tex_to_color_map={"一、候选数": self.board_color})
+        cand_explain01 = TextMobject("候选数，顾名思义就是该格可选择的数字", tex_to_color_map={"候选数": self.board_color})
+        cand_explain02 = TextMobject("在盘面上标满数字可能不是首选的方法")
+        cand_explain03 = TextMobject("但是可以帮助我们理解一些东西")
+        cand_explain04 = TextMobject("1.唯一数法")
+        cand_explain05 = TextMobject("注意这一格，候选数只剩下了9", tex_to_color_map={"剩下": self.board_color})
+        cand_explain06 = TextMobject("所以此格只能填9")
+        cand_explain07 = TextMobject("没有候选数时，观察难度较高")
+        cand_explain08 = TextMobject("这里的已知数都是分散的")
+
+        ## 位置
+        cand_text.to_edge(UP)
+        cand_explain01.to_edge(UP)
+        cand_explain02.to_edge(UP)
+        cand_explain03.to_edge(UP)
+        cand_explain04.to_edge(UP)
+        cand_explain05.to_edge(UP)
+        cand_explain06.to_edge(UP)
+        cand_explain07.to_edge(UP)
+        cand_explain08.to_edge(UP)
+
+        ## 动画
+
+        ## 格子
+        self.show_grid()
+        ## 数字
+        self.show_num()
+        ## 标题
+        self.play(ApplyMethod(self.sudoku_group.next_to, cand_text.get_edge_center(DOWN), DOWN))
+        self.play(Write(cand_text))
+        self.wait(1)
+        self.cand_mark()
+
+        self.load_cand("cand/cand03.txt")
+        self.show_cand()
+        self.play(ApplyMethod(self.cand_group.set_fill, BLUE))
+        self.play(ApplyMethod(self.cand_group.set_fill, WHITE))
+        self.wait(2)
+
+        self.play(ReplacementTransform(cand_text, cand_explain01))
+        self.wait(2)
+        self.play(ReplacementTransform(cand_explain01, cand_explain02))
+        self.wait(2)
+        self.play(ReplacementTransform(cand_explain02, cand_explain03))
+        self.wait(3)
+
+        self.play(ReplacementTransform(cand_explain03, cand_explain04))
+        self.wait(2)
+        self.play(ReplacementTransform(cand_explain04, cand_explain05))
+        self.add_num_highlight(6, 4)
+        self.show_num_highlight()
+        self.wait(1)
+        self.erase_num_highlight()
+
+        self.play(ReplacementTransform(cand_explain05, cand_explain06))
+        self.solve_from_cand(6, 4, 9)
+        self.wait(2)
+        self.play(ReplacementTransform(cand_explain06, cand_explain07))
+        self.wait(2)
+
+        self.box_highlight(7)
+        self.add_num_highlight(8, 5)
+        self.add_num_highlight(6, 5)
+        self.add_num_highlight(7, 4)
+        self.add_num_highlight(7, 3)
+        self.show_num_highlight()
+        self.erase_num_highlight()
+
+        self.row_highlight(6)
+        self.add_num_highlight(6, 1)
+        self.add_num_highlight(6, 8)
+        self.add_num_highlight(6, 0)
+        self.show_num_highlight()
+        self.erase_num_highlight()
+
+        self.col_highlight(4)
+        self.add_num_highlight(2, 4)
+        self.show_num_highlight()
+        self.erase_num_highlight()
+
+        self.add_num_highlight(8, 5)
+        self.add_num_highlight(6, 5)
+        self.add_num_highlight(7, 4)
+        self.add_num_highlight(7, 3)
+        self.add_num_highlight(6, 1)
+        self.add_num_highlight(6, 8)
+        self.add_num_highlight(6, 0)
+        self.add_num_highlight(2, 4)
+        self.show_num_highlight()
+        self.wait(3)
+
+        self.play(ReplacementTransform(cand_explain07, cand_explain08))
+
         self.wait(1)
