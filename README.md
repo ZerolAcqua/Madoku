@@ -7,7 +7,7 @@ Showing how to solve a sudoku with manim
 # 
 > 作者：***Hu_Lechen/HappyLakeCity/Zerol_Acqua*** 
 最新版本日期：**2020/11/10** 
-文档更新日期：**2021/1/9**
+文档更新日期：**2021/1/13**
 
 
 
