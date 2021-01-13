@@ -1,5 +1,6 @@
 from manimlib.imports import *
 import copy
+import math
 
 
 class Sudoku_scene(Scene):
@@ -9,6 +10,7 @@ class Sudoku_scene(Scene):
         'row_color': RED,  # 行的颜色
         'col_color': YELLOW,  # 列的颜色
         'box_color': GREEN,  # 宫的颜色
+        'cand_color': ORANGE, # 候选数的颜色
         'scale': 0.35,  # 格子的比例
     }
 
@@ -221,7 +223,7 @@ class Sudoku_scene(Scene):
 
     ## 删除某个候选数
     ## 注意候选数和num是一样的，row和col与盘面是差一的
-    def del_cand(self, row, col, num, show=True):
+    def del_cand(self, row, col, num, show=False):
         if (self.cand_check == False):
             return
         if (show == True):
@@ -233,7 +235,8 @@ class Sudoku_scene(Scene):
         tmp = VGroup()
         for i in self.cand_del_list:
             tmp.add(i)
-        self.play(ApplyMethod(tmp.set_opacity, 0))
+        self.play(ApplyMethod(tmp.set_fill, self.cand_color))
+        self.play(ApplyMethod(tmp.set_fill,WHITE,0))
         self.cand_del_list.clear()
 
     ## 删除某格的除了except_cand的候选数
@@ -261,8 +264,8 @@ class Sudoku_scene(Scene):
         self.num_group.add(num_text)
         self.play(Write(num_text))
 
-    ## 从候选数得到数字
-    def solve_from_cand(self, row, col, num):
+    ## 从候选数得到数字 update_check:是否更新
+    def solve_from_cand(self, row, col, num, update_check=True):
         if (self.cand_check == False):
             self.solve(row, col, num)
         else:
@@ -280,6 +283,28 @@ class Sudoku_scene(Scene):
                       ApplyMethod(self.cand_list[row * 9 + col][8].set_opacity, 0),
                       )
             self.num_group.add(num_text)
+            if (update_check == True):
+                self.solve_update_rand(row, col, num, False)
+
+
+    ## 填入数字，更新候选数,write_check是否填写数字
+    def solve_update_rand(self, row, col, num, write_check=False):
+        # 行
+        for i in range(9):
+            self.del_cand(row, i, num, False)
+        # 列
+        for i in range(9):
+            self.del_cand(i, col, num, False)
+        # 宫
+        Row = math.floor(row / 3) * 3
+        Col = math.floor(col / 3) * 3
+        for i in range(3):
+            for j in range(3):
+                self.del_cand(Row + i, Col + j, num, False)
+
+        self.show_del_cand_then_clear()
+        if (write_check == True):
+            self.solve(row, col, num)
 
     ## 强调候选数或者是特定格子，如果num是0，强调此格子
     ## 录入
@@ -377,3 +402,9 @@ class Sudoku_scene(Scene):
 
     def clear_note(self):
         self.note_list.clear()
+
+class Sudoku_with_Subset_scene(Sudoku_scene):
+    CONFIG = {
+
+    }
+    
