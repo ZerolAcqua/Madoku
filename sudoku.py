@@ -1,6 +1,8 @@
 # -*- coding=utf-8 -*-
 from mydemo.Madoku.package_color import*
 
+
+# @ZerolAcqua
 # SudokuLine类，参考了@cigar666的CodeLine类
 # 可以用于代替TexMObject
 class SudokuLine(Text):
@@ -94,7 +96,13 @@ class SudokuLine(Text):
     def __init__(self, text, **kwargs):
         Text.__init__(self, text, **kwargs)
 
-
+# @Naxi-s
+# 数独场景类，用于创建一个含有数字和候选数的盘面
+# ZerolAcqua所做的修改有：① 封装成类（并不严格，其实只是把常量放在CONFIG里面，加了一堆self，把函数放在一个类里面了，封太死了反而不太方便）
+#                      ② 删去了不必要的local()字典的调用
+#                      ③ 使用replace字符串替换函数，兼容另一种数独的字符串表示(带"."的表示可以从HoDoKu中直接导出)
+#                      ④ 将TextMobject换成了自定义的Text类——SudokuLine
+# Todo:①能否改成重复使用的盘面呢，有时需要更换数独的题目，这时就只要求改变数独的数字了
 class Sudoku_Scene(Scene):
     # 这里是一些常量
     CONFIG = {
@@ -124,27 +132,16 @@ class Sudoku_Scene(Scene):
     }
 
     # 已知数
-    # string1 =\
-    #     '.41.2....' \
-    #     '5....6...' \
-    #     '..8..724.' \
-    #     '.....948.' \
-    #     '9.6.5.3.2' \
-    #     '.273.....' \
-    #     '.531..9..' \
-    #     '...6....8' \
-    #     '....9.13.'
-
     string1 =\
-        '041020000' \
-        '500006000' \
-        '008007240' \
-        '000009480' \
-        '906050302' \
-        '027300000' \
-        '053100900' \
-        '000600008' \
-        '000090130'
+        '.........' \
+        '.........' \
+        '.........' \
+        '.........' \
+        '.........' \
+        '.........' \
+        '.........' \
+        '.........' \
+        '.........'
 
     # ------组织数独类中的Object------
 
@@ -261,14 +258,16 @@ class Sudoku_Scene(Scene):
             self.boxes_list.append(useless_list)
     
         # 初始数字列表和运行数字列表
+
+        self.string1=self.string1.replace('.','0')
         for i in range(1, 10):
             for j in range(1, 10):
                 self.domain_num_list.append(int(self.string1[9 * i + j - 10]))
-                locals()['num' + str(i) + 'num' + str(j)] = SudokuLine(self.string1[9 * i + j - 10], color=self.nums_color,
+                temp = SudokuLine(self.string1[9 * i + j - 10], color=self.nums_color,
                                                                         plot_depth=2,size=self.num_scale)
-                self.nums_list.append(locals()['num' + str(i) + 'num' + str(j)])
-                if int(self.string1[9 * i + j - 10]) == 0:
-                    locals()['num' + str(i) + 'num' + str(j)].set_opacity(0)
+                self.nums_list.append(temp)
+                if self.string1[9 * i + j - 10] == '0' :
+                    temp.set_opacity(0)
         t = 0
         for i in self.nums_list:
             i.move_to(RIGHT * (self.distance_of_squares * (t % 9 + 1) - 5 * self.distance_of_squares + (
@@ -361,6 +360,7 @@ class Sudoku_Scene(Scene):
 
 class TestScene(Sudoku_Scene):
     def construct(self):
+        self.string1='..6...72.43......6.5.9.2.....1549...8.......5...8213.....1.7.5.5......39.83...4..'
         self.create_borad()
         self.wait()
         self.play(Write(self.squares))
