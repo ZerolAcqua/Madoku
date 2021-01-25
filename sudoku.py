@@ -103,12 +103,10 @@ class SudokuLine(Text):
 #                      ③ 使用replace字符串替换函数，兼容另一种数独的字符串表示(带"."的表示可以从HoDoKu中直接导出)
 #                      ④ 将TextMobject换成了自定义的Text类——SudokuLine
 # Todo:①能否改成重复使用的盘面呢，有时需要更换数独的题目，这时就只要求改变数独的数字了
-class Sudoku_Scene(Scene):
+# Todo:②已知数和填写的数字能否分别开来显示
+class Sudoku(VGroup):
     # 这里是一些常量
     CONFIG = {
-        'camera_config': {
-            'background_color': WHITE,
-        },
         # 可以更改的一些盘面参数
         'center_of_squares': [-3, 0],   # 盘面的位置
         'side_lenth_of_squares': 0.6,   # 正方形边长
@@ -123,6 +121,18 @@ class Sudoku_Scene(Scene):
         'cand_scale': 0.4,              # 候选数缩放
         'gap_of_cand': 0.2,             # 候选数间距增量
 
+        # 已知数
+        'num_str' :\
+            '.........' \
+            '.........' \
+            '.........' \
+            '.........' \
+            '.........' \
+            '.........' \
+            '.........' \
+            '.........' \
+            '.........',
+    
         # ------------------------------------------------------ #
         # Acqua版本的一些参数
         'row_color': RED,               # 代表行的颜色
@@ -131,17 +141,7 @@ class Sudoku_Scene(Scene):
 
     }
 
-    # 已知数
-    string1 =\
-        '.........' \
-        '.........' \
-        '.........' \
-        '.........' \
-        '.........' \
-        '.........' \
-        '.........' \
-        '.........' \
-        '.........'
+
 
     # ------组织数独类中的Object------
 
@@ -174,7 +174,11 @@ class Sudoku_Scene(Scene):
     nums = VGroup()
     init_cands = VGroup()   # 这个是代表最初始的没有排除过的候选数的元素
     cands = VGroup()
-    all_v = VGroup()
+
+    def __init__(self, **kwargs):
+        VGroup.__init__(self, **kwargs)
+        self.create_borad()
+
 
     def create_borad(self):
         # ------建立基本元素或群组的列表------
@@ -259,14 +263,14 @@ class Sudoku_Scene(Scene):
     
         # 初始数字列表和运行数字列表
 
-        self.string1=self.string1.replace('.','0')
+        self.num_str=self.num_str.replace('.','0')
         for i in range(1, 10):
             for j in range(1, 10):
-                self.domain_num_list.append(int(self.string1[9 * i + j - 10]))
-                temp = SudokuLine(self.string1[9 * i + j - 10], color=self.nums_color,
+                self.domain_num_list.append(int(self.num_str[9 * i + j - 10]))
+                temp = SudokuLine(self.num_str[9 * i + j - 10], color=self.nums_color,
                                                                         plot_depth=2,size=self.num_scale)
                 self.nums_list.append(temp)
-                if self.string1[9 * i + j - 10] == '0' :
+                if self.num_str[9 * i + j - 10] == '0' :
                     temp.set_opacity(0)
         t = 0
         for i in self.nums_list:
@@ -330,25 +334,29 @@ class Sudoku_Scene(Scene):
         self.nums = VGroup(*self.nums_list)
     
         # 所有元素
-        self.all_v = VGroup(self.squares, self.nums, self.init_cands)
-        
+        self.add(self.squares, self.nums, self.init_cands)
+
+
 
     # ------用于建立元素模型的辅助函数（可以不仅仅用于模型建造）------
 
     # 下面三个函数用于检查两个编号对应的格子是否在同一行、列、宫
-    def row_check(self,index1, index2):
+    @staticmethod
+    def row_check(index1, index2):
         if index1 - index1 % 9 == index2 - index2 % 9:
             return 1
         else:
             return 0
 
-    def col_check(self, index1, index2):
+    @staticmethod
+    def col_check(index1, index2):
         if (index1 - index2) % 9 == 0:
             return 1
         else:
             return 0
 
-    def box_check(self, index1, index2):
+    @staticmethod
+    def box_check(index1, index2):
         if ((index1 - index1 % 9) / 9) - ((index1 - index1 % 9) / 9) % 3 == ((index2 - index2 % 9) / 9) - (
                 (index2 - index2 % 9) / 9) % 3 and (index1 % 9) - (index1 % 9) % 3 == (
                 index2 % 9) - (index2 % 9) % 3:
@@ -358,13 +366,22 @@ class Sudoku_Scene(Scene):
 
 # ------动画制作------
 
-class TestScene(Sudoku_Scene):
+
+class TestScene(Scene):
+    CONFIG = {
+        "camera_config": {
+            "background_color": WHITE,
+        },
+    }
+
     def construct(self):
-        self.string1='..6...72.43......6.5.9.2.....1549...8.......5...8213.....1.7.5.5......39.83...4..'
-        self.create_borad()
+        Sudoku1 = Sudoku(num_str='..6...72.43......6.5.9.2.....1549...8.......5...8213.....1.7.5.5......39.83...4..')
         self.wait()
-        self.play(Write(self.squares))
-        self.play(Write(self.nums))
-        self.play(Write(self.cands))
-        self.play(self.all_v.scale, 0.5)
+        self.play(Write(Sudoku1.squares))
+        self.play(Write(Sudoku1.nums))
+        self.play(Write(Sudoku1.cands))
+        self.play(Sudoku1[0].set_colors_by_radial_gradient,
+                  {'radius': 3.5, 'inner_color': YELLOW_B, 'outer_color': BLUE_B})
+        self.play(Sudoku1[0].scale,0.5,Sudoku1[1].scale,0.5,Sudoku1[2].scale,0.5)
         self.wait()
+
