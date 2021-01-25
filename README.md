@@ -13,7 +13,7 @@ Showing how to solve a sudoku with manim
 > [我们使用的MK版本的链接](https://github.com/manim-kindergarten)
 
 # `SudokuLine`类
-- `SudokuLine`类是`Text`的子类，参考@cigar666的CodeLine类，定义好了各种关键名词的颜色。
+- `SudokuLine`类是`Text`的子类，参考@cigar666的CodeLine类，
 
 
 # `Sudoku_Scene`类
