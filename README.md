@@ -16,18 +16,18 @@ Showing how to solve a sudoku with manim
 - `SudokuLine`类是`Text`的子类，参考@cigar666的CodeLine类，定义好了各种关键名词的颜色。
 
 
-# `Sudoku_Scene`类
-- `Sudoku_Scene`类是`Scene`的子类，定义了数独盘面，已知数、候选数。
-- 使用时将已知数字符串赋值给**string1**，然后调用**create_board()**函数构造数独盘面。
+# `Sudoku`类
+- `Sudoku`类是`VGroup`的子类，定义了数独盘面，已知数、候选数。
+- 使用时将已知数字符串赋值给**num_str**，然后调用**create_board()**函数构造数独盘面。
 - 类方法
-    >  create_borad(self)  
-    构造一个数独盘面，根据`string1`提供的已知数，在盘面上绘制已知数和候选数
+    >  __create_borad(self)  
+    **私有方法**：构造一个数独盘面，根据`string1`提供的已知数，在盘面上绘制已知数和候选数
     
     > row_check(self,index1,index2)  
-    用于检查两个编号`index1` `index2`对应的格子是否在同一行
+    **静态方法**：用于检查两个编号`index1` `index2`对应的格子是否在同一行
     
     > col_check(self, index1, index2)  
-    用于检查两个编号`index1` `index2`对应的格子是否在同一列
+    **静态方法**：用于检查两个编号`index1` `index2`对应的格子是否在同一列
     
     > box_check(self, index1, index2)  
-    用于检查两个编号`index1` `index2`对应的格子是否在同一宫
+    **静态方法**：用于检查两个编号`index1` `index2`对应的格子是否在同一宫
