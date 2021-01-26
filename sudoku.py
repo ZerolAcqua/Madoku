@@ -1,5 +1,6 @@
 # -*- coding=utf-8 -*-
 from mydemo.Madoku.package_color import*
+from mydemo.Madoku.package_motion import*
 
 
 # @ZerolAcqua
@@ -395,6 +396,8 @@ class TestScene(Scene):
         self.play(Write(Sudoku1[1]))
         self.play(Write(Sudoku1[2]))
         Sudoku1.save_state()
+        move_out_effects_particles_1(self, Sudoku1.cands[1])
+        wave(self, Sudoku1.squares[15])
         self.play(Sudoku1.scale,0.5)
         self.play(Sudoku1.restore)
 
