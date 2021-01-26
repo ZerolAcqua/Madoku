@@ -6,7 +6,7 @@ Showing how to solve a sudoku with manim
 自己也是第一次用github,就当是代码，还有学习的记录吧
 # 
 > 作者：***Hu_Lechen/HappyLakeCity/Zerol_Acqua***与***Naxi-s/ tucoconum***       
-文档更新日期：**2021/1/25**   
+文档更新日期：**2021/1/26**   
 感谢@Naxi-s全力地支持与合作，代码将在近期进行更新   
 原先的代码已经放入old文件夹中
 # 
