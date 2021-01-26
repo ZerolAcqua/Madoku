@@ -304,8 +304,8 @@ class Sudoku(VGroup):
         useless_list1 = [1, 2, 3, 4, 5, 6, 7, 8, 9]
         for i in range(0, 81):
             if self.domain_num_list[i] != 0:
-                for j in self.init_cands_list[i]
-                j.set_opacity(0)
+                for j in self.init_cands_list[i]:
+                    j.set_opacity(0)
             if self.domain_num_list[i] == 0:
                 useless_list = []
                 useless_list2 = []
