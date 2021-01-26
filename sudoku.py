@@ -303,9 +303,13 @@ class Sudoku(VGroup):
             self.init_cands.add(VGroup(*i))
         useless_list1 = [1, 2, 3, 4, 5, 6, 7, 8, 9]
         for i in range(0, 81):
+            if self.domain_num_list[i] != 0:
+                for j in self.init_cands_list[i]
+                j.set_opacity(0)
             if self.domain_num_list[i] == 0:
                 useless_list = []
                 useless_list2 = []
+                useless_list3 = []
                 for j in self.except_list[i]:
                     useless_list.append(self.domain_num_list[j])
                 for j in useless_list1:
@@ -315,6 +319,13 @@ class Sudoku(VGroup):
                         useless_list2.append(j - 1)
                 for j in useless_list2:
                     self.cands_list.append(self.init_cands_list[i][j])
+                for j in useless_list1:
+                    if (j-1) in useless_list2:
+                        pass
+                    else:
+                        useless_list3.append(j - 1)
+                for j in useless_list3:
+                    self.init_cands_list[i][j].set_opacity(0)
         self.cands = VGroup(*self.cands_list)
     
         # ------建立基本元素或群组的VGroup------
