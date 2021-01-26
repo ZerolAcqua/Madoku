@@ -23,11 +23,11 @@ Showing how to solve a sudoku with manim
     >  __create_borad(self)  
     **私有方法**：构造一个数独盘面，根据`string1`提供的已知数，在盘面上绘制已知数和候选数
     
-    > row_check(self,index1,index2)  
+    > row_check(index1,index2)  
     **静态方法**：用于检查两个编号`index1` `index2`对应的格子是否在同一行
     
-    > col_check(self, index1, index2)  
+    > col_check(index1, index2)  
     **静态方法**：用于检查两个编号`index1` `index2`对应的格子是否在同一列
     
-    > box_check(self, index1, index2)  
+    > box_check(index1, index2)  
     **静态方法**：用于检查两个编号`index1` `index2`对应的格子是否在同一宫
