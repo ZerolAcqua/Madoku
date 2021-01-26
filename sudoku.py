@@ -143,46 +143,45 @@ class Sudoku(VGroup):
 
 
 
-    # ------组织数独类中的Object------
 
-    # 关于运行数独方法基于的一些数据类型
-    domain_num_list = []
-    domain_num_list_changing = []
-    domain_cand_list = []
-    domain_cand_list_changing = []
-
-    # 一些元素的列表
-    squares_list = []
-    rows_list = []
-    cols_list = []
-    boxes_list = []
-    nums_list = []
-    init_cands_list = []   # 这个是代表最初始的没有排除过的候选数的元素
-    cands_list = []
-
-    # 编号的列表
-    rows_index_list = []
-    cols_index_list = []
-    boxes_index_list = []
-    except_list = []
-
-    # 一些元素的VGroup或VGroup的列表
-    squares = VGroup()
-    rows_v_list = []
-    cols_v_list = []
-    boxes_v_list = []
-    nums = VGroup()
-    init_cands = VGroup()   # 这个是代表最初始的没有排除过的候选数的元素
-    cands = VGroup()
 
     def __init__(self, **kwargs):
         VGroup.__init__(self, **kwargs)
-        self.create_borad()
+        # ------组织数独类中的Object,对象的属性------
+
+        # 关于运行数独方法基于的一些数据类型
+        self.domain_num_list = []
+        self.domain_num_list_changing = []
+        self.domain_cand_list = []
+        self.domain_cand_list_changing = []
+
+        # 一些元素的列表
+        self.squares_list = []
+        self.rows_list = []
+        self.cols_list = []
+        self.boxes_list = []
+        self.nums_list = []
+        self.init_cands_list = []  # 这个是代表最初始的没有排除过的候选数的元素
+        self.cands_list = []
+
+        # 编号的列表
+        self.rows_index_list = []
+        self.cols_index_list = []
+        self.boxes_index_list = []
+        self.except_list = []
+
+        # 一些元素的VGroup或VGroup的列表
+        self.squares = VGroup()
+        self.rows_v_list = []
+        self.cols_v_list = []
+        self.boxes_v_list = []
+        self.nums = VGroup()
+        self.init_cands = VGroup()  # 这个是代表最初始的没有排除过的候选数的元素
+        self.cands = VGroup()
+        self.__create_borad()
 
 
-    def create_borad(self):
-        # ------建立基本元素或群组的列表------
-        # 正方形列表和位置调节
+    def __create_borad(self):
         for i in range(81):
             self.squares_list.append(Square(side_length= self.side_lenth_of_squares,
                                             color= self.square_color,
@@ -320,7 +319,7 @@ class Sudoku(VGroup):
                 for j in useless_list2:
                     self.cands_list.append(self.init_cands_list[i][j])
                 for j in useless_list1:
-                    if (j-1) in useless_list2:
+                    if (j - 1) in useless_list2:
                         pass
                     else:
                         useless_list3.append(j - 1)
@@ -388,11 +387,25 @@ class TestScene(Scene):
     def construct(self):
         Sudoku1 = Sudoku(num_str='..6...72.43......6.5.9.2.....1549...8.......5...8213.....1.7.5.5......39.83...4..')
         self.wait()
-        self.play(Write(Sudoku1.squares))
-        self.play(Write(Sudoku1.nums))
-        self.play(Write(Sudoku1.cands))
+        # self.play(Write(Sudoku1.squares))
+        # self.play(Write(Sudoku1.nums))
+        # self.play(Write(Sudoku1.cands))
+
+        self.play(Write(Sudoku1[0]))
+        self.play(Write(Sudoku1[1]))
+        self.play(Write(Sudoku1[2]))
+        Sudoku1.save_state()
+        self.play(Sudoku1.scale,0.5)
+        self.play(Sudoku1.restore)
+
         self.play(Sudoku1[0].set_colors_by_radial_gradient,
                   {'radius': 3.5, 'inner_color': YELLOW_B, 'outer_color': BLUE_B})
-        self.play(Sudoku1[0].scale,0.5,Sudoku1[1].scale,0.5,Sudoku1[2].scale,0.5)
+        Sudoku3=Sudoku1.copy()
+
+        # self.play(Sudoku1.scale,0.5)
+        Sudoku2 = Sudoku(num_str='1.92...4.67.9.8....85......7..15.......8.7.......69..5......27....7.4.36.5...64.1',
+                         center_of_squares=[3, 0])
+        self.play(Transform(Sudoku1,Sudoku2))
+        self.play(Transform(Sudoku1,Sudoku3))
         self.wait()
 
