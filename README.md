@@ -22,8 +22,8 @@ Showing how to solve a sudoku with manim
 #  `Sudoku`类
 - `Sudoku`类是`VGroup`的子类，定义了数独盘面，已知数、候选数。
 - 使用时将已知数字符串赋值给**num_str**，然后调用**create_board()**函数构造数独盘面。
-- **类属性**
-    *类属性*：以CONFIG字典形式给出
+- **类属性**  
+    *类属性*：以CONFIG字典形式给出  
     *实例属性*：主要是存储数独盘面的图形和数字的相关列表和VGroup
 
 - **类方法**
@@ -51,9 +51,9 @@ Showing how to solve a sudoku with manim
 
 #  `FadeOutWithParticles1`类
 - `FadeOutWithParticles1`类是`FadeOut`的子类，用法和FadeOut等动画类是一样的。
-- **类属性**
-    *类属性*：以CONFIG字典形式给出
-    *实例属性*：主要是存储粒子的VGroup和随机方向向量的列表
+- **类属性**  
+    *类属性*：以CONFIG字典形式给出  
+    *实例属性*：主要是存储粒子的VGroup和随机方向向量的列表  
     -  `self.list1` = []
     -  `self.list2` = []
     -  `self.vg` = VGroup()
