@@ -15,7 +15,7 @@ Showing how to solve a sudoku with manim
 ---
 
 # `SudokuLine`类
-- `SudokuLine`类是`Text`的子类，参考@cigar666的`CodeLine`类，定义好了各种关键名词的颜色——`t2c`字典。
+- `SudokuLine`类是`Text`的子类，参考@cigar666的`CodeLine`类，CONFIG字典中，有定义好了各种名词的颜色的`t2c`，以及其他类属性
 
 ---
 
@@ -23,8 +23,8 @@ Showing how to solve a sudoku with manim
 - `Sudoku`类是`VGroup`的子类，定义了数独盘面，已知数、候选数。
 - 使用时将已知数字符串赋值给**num_str**，然后调用**create_board()**函数构造数独盘面。
 - **类属性**  
-    *类属性*：以CONFIG字典形式给出  
-    *实例属性*：主要是存储数独盘面的图形和数字的相关列表和VGroup
+    1. 一部分以CONFIG字典形式给出（在构造函数中转化为**实例属性**）  
+    2. 另一部分**实例属性**主要是存储数独盘面的图形和数字的相关列表和VGroup
 
 - **类方法**
     > _ _ init _ _(self, **kwargs)
@@ -49,16 +49,16 @@ Showing how to solve a sudoku with manim
 
     ---
 
-#  `FadeOutWithParticles1`类
-- `FadeOutWithParticles1`类是`FadeOut`的子类，用法和FadeOut等动画类是一样的。
+#  `FadeOutWithParticles`类
+- `FadeOutWithParticles`类是`FadeOut`的子类，用法和FadeOut等动画类是一样的。
 - **类属性**  
-    *类属性*：以CONFIG字典形式给出  
-    *实例属性*：主要是存储粒子的VGroup和随机方向向量的列表  
-    -  `self.list1` = []
-    -  `self.list2` = []
-    -  `self.vg` = VGroup()
+    1. 一部分以CONFIG字典形式给出（在构造函数中转化为**实例属性**）    
+    2. 另一部分**实例属性**主要是存储粒子的VGroup和随机方向向量的列表   
+        -  `self.list1` = []
+        -  `self.list2` = []
+        -  `self.vg` = VGroup()
 
-- *类方法*
+- **类方法**
     > _ _ init _ _(self, mobject, **kwargs)
     
     在构造函数中以`mobject`的位置，构造若干个圆或正方形，随机生成它们移动的方向

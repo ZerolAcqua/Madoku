@@ -6,13 +6,13 @@ from package_color import *
 
 
 # @Naxi-s
-# 动画效果类，移除V对象的破碎效果，其中的参数都除了vmobject和run_time外都可以忽略
+# 动画效果类，移除V对象的破碎效果，其中的参数都除了Mobject和run_time外都可以忽略
 # Acqua做出的修改有：① parti_color的缺省值改为None,相应的判断也进行了修改
 #                 ② run_time是基类的属性，所以我这里删掉了
 #                 ③ 封装成类,可以像manim的其他方法那样同时调用，或许写成方法会更加灵活和方便
 #                 ④ 修复了正方形粒子效果位置错误的BUG
 # Todo:暂时没想好，主要是卡顿的问题
-class FadeOutWithParticles1(FadeOut):
+class FadeOutWithParticles(FadeOut):
     CONFIG = {
         'inner_round': 0.01,
         'inner_round': 0.01,
@@ -20,7 +20,7 @@ class FadeOutWithParticles1(FadeOut):
         'parti_color': None,
         'mobjects_range_inf': 0,
         'mobjects_range_sup': 0.06,
-        'circles': 10,
+        'circles': 30,
         'squares': 0,
         'v_number': 0,
         'v_letters': 0,
