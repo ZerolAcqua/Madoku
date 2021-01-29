@@ -85,9 +85,13 @@ class SudokuLine(Text):
             '数对': ORANGE,
             '数组': ORANGE,
             '链': ORANGE,
+
             'Zerol': BLUE_B,
             'Acqua': BLUE_B,
+            '丘卡': BLUE_B,
+            '零醇丘卡': BLUE_B,
             'Naxi-s': BLUE_B,
+            'tucoconum': BLUE_B,
             '~': WHITE,  # 随便搞个不常用的字符设成白色，以便在有时不能用空格占位时（比如涉及Transform）当空格用
         },
         'font': 'Consolas',
@@ -153,34 +157,36 @@ class Sudoku(VGroup):
         # ------组织数独类中的Object,对象的属性------
 
         # 关于运行数独方法基于的一些数据类型
-        self.domain_num_list = []
-        self.domain_num_list_changing = []
-        self.domain_cand_list = []
-        self.domain_cand_list_changing = []
+        self.domain_num_list = []               # 存储81个int类型数据的列表，是初始盘面的数字
+        self.domain_num_list_changing = []      # 存储81个int类型数据的列表，是当前数独盘面的数字
+        self.domain_cand_list = []              # 存储81个列表，每个列表对应一个格子的int类型候选数，代表最初始的没有排除过的候选数的元素
+        self.domain_cand_list_changing = []     # 存储81个列表，每个列表对应一个格子的int类型候选数，代表当前盘面的候选数的元素
 
         # 一些元素的列表
-        self.squares_list = []
-        self.rows_list = []
-        self.cols_list = []
-        self.boxes_list = []
-        self.nums_list = []
-        self.init_cands_list = []  # 这个是代表最初始的没有排除过的候选数的元素
-        self.cands_list = []
+        self.squares_list = []      # 存储81个Square
+        self.rows_list = []         # 存储9个列表，每个列表对应一行的Square
+        self.cols_list = []         # 存储9个列表，每个列表对应一列的Square
+        self.boxes_list = []        # 存储9个列表，每个列表对应一宫的Square
+        self.nums_list = []         # 存储VMobject已知数的列表
+        self.init_cands_list = []   # 存储81个列表，每个列表对应一个格子的VMobject候选数，代表最初始的没有排除过的候选数的元素
+        self.cands_list = []        # 存储81个列表，每个列表对应一个格子的VMobject候选数，代表当前盘面的候选数的元素
+
 
         # 编号的列表
-        self.rows_index_list = []
-        self.cols_index_list = []
-        self.boxes_index_list = []
-        self.except_list = []
+        self.rows_index_list = []   # 存储9个列表，每个列表对应一行的Square的下标
+        self.cols_index_list = []   # 存储9个列表，每个列表对应一列的Square的下标
+        self.boxes_index_list = []  # 存储9个列表，每个列表对应一宫的Square的下标
+        self.except_list = []       # 存储81个列表，每个列表对一个格子所能排除的9+6+6=21个Square的下标
+
 
         # 一些元素的VGroup或VGroup的列表
-        self.squares = VGroup()
-        self.rows_v_list = []
-        self.cols_v_list = []
-        self.boxes_v_list = []
-        self.nums = VGroup()
-        self.init_cands = VGroup()  # 这个是代表最初始的没有排除过的候选数的元素
-        self.cands = VGroup()
+        self.squares = VGroup()     # 存储81个Square的VGroup
+        self.rows_v_list = []       # 存储9个VGroup，每个VGroup组织一行的Square
+        self.cols_v_list = []       # 存储9个VGroup，每个VGroup组织一列的Square
+        self.boxes_v_list = []      # 存储9个VGroup，每个VGroup组织一宫的Square
+        self.nums = VGroup()        # 组织VMobject已知数的VGroup
+        self.init_cands = VGroup()  # 包括81个子VGroup,每个VGroup包含一个格子的VMobject候选数，代表最初始的没有排除过的候选数的元素？？？
+        self.cands = VGroup()       # 所有的81*（0,9）的VMobject候选数
         self.__create_borad()
 
 
@@ -264,8 +270,7 @@ class Sudoku(VGroup):
             self.boxes_list.append(useless_list)
     
         # 初始数字列表和运行数字列表
-
-        self.num_str=self.num_str.replace('.','0')
+        self.num_str=self.num_str.replace('.','0')  # 将字符串中的'.'转化'0'
         for i in range(1, 10):
             for j in range(1, 10):
                 self.domain_num_list.append(int(self.num_str[9 * i + j - 10]))
@@ -285,6 +290,7 @@ class Sudoku(VGroup):
         self.domain_num_list_changing = [i for i in self.domain_num_list]
     
         # 候选数列表和运行候选数列表
+        # 下面两个for循环是用来确实候选数的位置的
         for i in range(0, 81):
             useless_list = []
             for t in range(1, 10):
@@ -305,20 +311,26 @@ class Sudoku(VGroup):
             self.init_cands.add(VGroup(*i))
         useless_list1 = [1, 2, 3, 4, 5, 6, 7, 8, 9]
         for i in range(0, 81):
+            # 如果此格有已知/已填数
             if self.domain_num_list[i] != 0:
                 for j in self.init_cands_list[i]:
-                    j.set_opacity(0)
+                    j.set_opacity(0)    # 候选数全部消失
+            # 如果此格没有数
             if self.domain_num_list[i] == 0:
                 useless_list = []
                 useless_list2 = []
                 useless_list3 = []
+                # 对此格的排除域的每个格子
                 for j in self.except_list[i]:
+                    # 获取排除域的所有已知/已填数
                     useless_list.append(self.domain_num_list[j])
+                # 找出候选数需要保留的下标
                 for j in useless_list1:
                     if j in useless_list:
                         pass
                     else:
                         useless_list2.append(j - 1)
+                # 将筛选后的候选数加入cands_list
                 for j in useless_list2:
                     self.cands_list.append(self.init_cands_list[i][j])
                 for j in useless_list1:
@@ -327,7 +339,7 @@ class Sudoku(VGroup):
                     else:
                         useless_list3.append(j - 1)
                 for j in useless_list3:
-                    self.init_cands_list[i][j].set_opacity(0)
+                    self.init_cands_list[i][j].set_opacity(0)   # ？
         self.cands = VGroup(*self.cands_list)
     
         # ------建立基本元素或群组的VGroup------
