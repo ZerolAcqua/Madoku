@@ -30,6 +30,7 @@ class SudokuLine(Text):
             '第七行': RED,
             '第八行': RED,
             '第九行': RED,
+            'r': RED,
             'r1': RED,
             'r2': RED,
             'r3': RED,
@@ -39,6 +40,7 @@ class SudokuLine(Text):
             'r7': RED,
             'r8': RED,
             'r9': RED,
+            'row': RED,
             '列': YELLOW_B,
             '第一列': YELLOW_B,
             '第二列': YELLOW_B,
@@ -49,6 +51,7 @@ class SudokuLine(Text):
             '第七列': YELLOW_B,
             '第八列': YELLOW_B,
             '第九列': YELLOW_B,
+            'c': YELLOW_B,
             'c1': YELLOW_B,
             'c2': YELLOW_B,
             'c3': YELLOW_B,
@@ -58,6 +61,7 @@ class SudokuLine(Text):
             'c7': YELLOW_B,
             'c8': YELLOW_B,
             'c9': YELLOW_B,
+            'column': YELLOW_B,
             '宫': GREEN,
             '第一宫': GREEN,
             '第二宫': GREEN,
@@ -68,6 +72,7 @@ class SudokuLine(Text):
             '第七宫': GREEN,
             '第八宫': GREEN,
             '第九宫': GREEN,
+            'b': GREEN,
             'b1': GREEN,
             'b2': GREEN,
             'b3': GREEN,
@@ -77,6 +82,7 @@ class SudokuLine(Text):
             'b7': GREEN,
             'b8': GREEN,
             'b9': GREEN,
+            'block': GREEN,
             '数独': GOLD,
             '无解': GOLD,
             '多解': GOLD,
@@ -103,7 +109,7 @@ class SudokuLine(Text):
     def __init__(self, text, **kwargs):
         Text.__init__(self, text, **kwargs)
 
-# @Naxi-s
+# @Naxi-s & @Acqua
 # 数独场景类，用于创建一个含有数字和候选数的盘面
 # Acqua所做的修改有：① 封装成类（并不严格，其实只是把常量放在CONFIG里面，加了一堆self，把函数放在一个类里面了，封太死了反而不太方便）
 #                 ② 删去了不必要的local()字典的调用
@@ -115,7 +121,7 @@ class Sudoku(VGroup):
     # 这里是一些常量
     CONFIG = {
         # 可以更改的一些盘面参数
-        'center_of_squares': [-3, 0],   # 盘面的位置
+        'center_of_squares': [-3, 0 ,0],   # 盘面的位置
         'side_lenth_of_squares': 0.6,   # 正方形边长
         'distance_of_squares': 2 / 3,   # 正方形间距（按照中心距离算）
         'gap_of_sections': 0.04,        # 宫间距增量
@@ -144,7 +150,7 @@ class Sudoku(VGroup):
         # Acqua版本的一些参数
         'row_color': RED,               # 代表行的颜色
         'col_color': YELLOW_B,          # 代表列的颜色
-        'box_color': GREEN,             # 代表宫的颜色
+        'block_color': GREEN,             # 代表宫的颜色
 
     }
 
@@ -166,7 +172,7 @@ class Sudoku(VGroup):
         self.squares_list = []      # 存储81个Square
         self.rows_list = []         # 存储9个列表，每个列表对应一行的Square
         self.cols_list = []         # 存储9个列表，每个列表对应一列的Square
-        self.boxes_list = []        # 存储9个列表，每个列表对应一宫的Square
+        self.blocks_list = []        # 存储9个列表，每个列表对应一宫的Square
         self.nums_list = []         # 存储VMobject已知数的列表
         self.init_cands_list = []   # 存储81个列表，每个列表对应一个格子的VMobject候选数，代表最初始的没有排除过的候选数的元素
         self.cands_list = []        # 存储81个列表，每个列表对应一个格子的VMobject候选数，代表当前盘面的候选数的元素
@@ -175,7 +181,7 @@ class Sudoku(VGroup):
         # 编号的列表
         self.rows_index_list = []   # 存储9个列表，每个列表对应一行的Square的下标
         self.cols_index_list = []   # 存储9个列表，每个列表对应一列的Square的下标
-        self.boxes_index_list = []  # 存储9个列表，每个列表对应一宫的Square的下标
+        self.blocks_index_list = []  # 存储9个列表，每个列表对应一宫的Square的下标
         self.except_list = []       # 存储81个列表，每个列表对一个格子所能排除的9+6+6=21个Square的下标
 
 
@@ -183,7 +189,7 @@ class Sudoku(VGroup):
         self.squares = VGroup()     # 存储81个Square的VGroup
         self.rows_v_list = []       # 存储9个VGroup，每个VGroup组织一行的Square
         self.cols_v_list = []       # 存储9个VGroup，每个VGroup组织一列的Square
-        self.boxes_v_list = []      # 存储9个VGroup，每个VGroup组织一宫的Square
+        self.blocks_v_list = []      # 存储9个VGroup，每个VGroup组织一宫的Square
         self.nums = VGroup()        # 组织VMobject已知数的VGroup
         self.init_cands = VGroup()  # 包括81个子VGroup,每个VGroup包含一个格子的VMobject候选数，代表最初始的没有排除过的候选数的元素？？？
         self.cands = VGroup()       # 所有的81*（0,9）的VMobject候选数
@@ -222,9 +228,9 @@ class Sudoku(VGroup):
         for i in [0, 3, 6, 27, 30, 33, 54, 57, 60]:
             useless_list = []
             for j in range(0, 81):
-                if self.box_check(i, j) == 1:
+                if self.block_check(i, j) == 1:
                     useless_list.append(j)
-            self.boxes_index_list.append(useless_list)
+            self.blocks_index_list.append(useless_list)
     
         # 排除域列表
         for i in range(0, 81):
@@ -243,7 +249,7 @@ class Sudoku(VGroup):
                             pass
                         else:
                             useless_list.append(k)
-            for j in self.boxes_index_list:
+            for j in self.blocks_index_list:
                 if i in j:
                     for k in j:
                         if k in useless_list:
@@ -263,11 +269,11 @@ class Sudoku(VGroup):
             for j in i:
                 useless_list.append(self.squares_list[j])
             self.cols_list.append(useless_list)
-        for i in self.boxes_index_list:
+        for i in self.blocks_index_list:
             useless_list = []
             for j in i:
                 useless_list.append(self.squares_list[j])
-            self.boxes_list.append(useless_list)
+            self.blocks_list.append(useless_list)
     
         # 初始数字列表和运行数字列表
         self.num_str=self.num_str.replace('.','0')  # 将字符串中的'.'转化'0'
@@ -353,11 +359,11 @@ class Sudoku(VGroup):
         for i in self.cols_list:
             useless_list = VGroup(*i)
             self.cols_v_list.append(useless_list)
-        for i in self.boxes_list:
+        for i in self.blocks_list:
             useless_list = VGroup(*i)
-            self.boxes_v_list.append(useless_list)
+            self.blocks_v_list.append(useless_list)
         self.nums = VGroup(*self.nums_list)
-    
+
         # 所有元素
         self.add(self.squares, self.nums, self.init_cands)
 
@@ -381,7 +387,7 @@ class Sudoku(VGroup):
             return 0
 
     @staticmethod
-    def box_check(index1, index2):
+    def block_check(index1, index2):
         if ((index1 - index1 % 9) / 9) - ((index1 - index1 % 9) / 9) % 3 == ((index2 - index2 % 9) / 9) - (
                 (index2 - index2 % 9) / 9) % 3 and (index1 % 9) - (index1 % 9) % 3 == (
                 index2 % 9) - (index2 % 9) % 3:
