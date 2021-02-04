@@ -41,27 +41,27 @@ class SudokuLine(Text):
             'r8': RED,
             'r9': RED,
             'row': RED,
-            '列': YELLOW_B,
-            '第一列': YELLOW_B,
-            '第二列': YELLOW_B,
-            '第三列': YELLOW_B,
-            '第四列': YELLOW_B,
-            '第五列': YELLOW_B,
-            '第六列': YELLOW_B,
-            '第七列': YELLOW_B,
-            '第八列': YELLOW_B,
-            '第九列': YELLOW_B,
-            'c': YELLOW_B,
-            'c1': YELLOW_B,
-            'c2': YELLOW_B,
-            'c3': YELLOW_B,
-            'c4': YELLOW_B,
-            'c5': YELLOW_B,
-            'c6': YELLOW_B,
-            'c7': YELLOW_B,
-            'c8': YELLOW_B,
-            'c9': YELLOW_B,
-            'column': YELLOW_B,
+            '列': YELLOW_D,
+            '第一列': YELLOW_D,
+            '第二列': YELLOW_D,
+            '第三列': YELLOW_D,
+            '第四列': YELLOW_D,
+            '第五列': YELLOW_D,
+            '第六列': YELLOW_D,
+            '第七列': YELLOW_D,
+            '第八列': YELLOW_D,
+            '第九列': YELLOW_D,
+            'c': YELLOW_D,
+            'c1': YELLOW_D,
+            'c2': YELLOW_D,
+            'c3': YELLOW_D,
+            'c4': YELLOW_D,
+            'c5': YELLOW_D,
+            'c6': YELLOW_D,
+            'c7': YELLOW_D,
+            'c8': YELLOW_D,
+            'c9': YELLOW_D,
+            'column': YELLOW_D,
             '宫': GREEN,
             '第一宫': GREEN,
             '第二宫': GREEN,
@@ -100,7 +100,7 @@ class SudokuLine(Text):
             'tucoconum': BLUE_B,
             '~': WHITE,  # 随便搞个不常用的字符设成白色，以便在有时不能用空格占位时（比如涉及Transform）当空格用
         },
-        'font': 'Consolas',
+        'font': '庞门正道标题体',
         'size': 0.36,
         'color': DARK_GRAY,
         'plot_depth': 2,
@@ -145,11 +145,11 @@ class Sudoku(VGroup):
             '.........' \
             '.........' \
             '.........',
-    
+
         # ------------------------------------------------------ #
         # Acqua版本的一些参数
         'row_color': RED,               # 代表行的颜色
-        'col_color': YELLOW_B,          # 代表列的颜色
+        'col_color': YELLOW_D,          # 代表列的颜色
         'block_color': GREEN,             # 代表宫的颜色
 
     }
@@ -211,7 +211,7 @@ class Sudoku(VGroup):
                             ((t - t % 9) / 9 - ((t - t % 9) / 9) % 3) / 3 - 1) * self.gap_of_sections) + (
                     self.center_of_squares[0]) * RIGHT + self.center_of_squares[1] * UP)
             t = t + 1
-    
+
         # 行、列、宫的编号的列表
         for i in [0, 9, 18, 27, 36, 45, 54, 63, 72]:
             useless_list = []
@@ -231,7 +231,7 @@ class Sudoku(VGroup):
                 if self.block_check(i, j) == 1:
                     useless_list.append(j)
             self.blocks_index_list.append(useless_list)
-    
+
         # 排除域列表
         for i in range(0, 81):
             useless_list = []
@@ -257,7 +257,7 @@ class Sudoku(VGroup):
                         else:
                             useless_list.append(k)
             self.except_list.append(useless_list)
-    
+
         # 正方形行、列、宫对应的列表
         for i in self.rows_index_list:
             useless_list = []
@@ -274,14 +274,14 @@ class Sudoku(VGroup):
             for j in i:
                 useless_list.append(self.squares_list[j])
             self.blocks_list.append(useless_list)
-    
+
         # 初始数字列表和运行数字列表
         self.num_str=self.num_str.replace('.','0')  # 将字符串中的'.'转化'0'
         for i in range(1, 10):
             for j in range(1, 10):
                 self.domain_num_list.append(int(self.num_str[9 * i + j - 10]))
                 temp = SudokuLine(self.num_str[9 * i + j - 10], color=self.nums_color,
-                                                                        plot_depth=2,size=self.num_scale)
+                                plot_depth=2,size=self.num_scale,stroke_width=1)
                 self.nums_list.append(temp)
                 if self.num_str[9 * i + j - 10] == '0' :
                     temp.set_opacity(0)
@@ -294,7 +294,7 @@ class Sudoku(VGroup):
                     self.center_of_squares[0]) * RIGHT + (self.center_of_squares[1]) * UP)
             t = t + 1
         self.domain_num_list_changing = [i for i in self.domain_num_list]
-    
+
         # 候选数列表和运行候选数列表
         # 下面两个for循环是用来确实候选数的位置的
         for i in range(0, 81):
@@ -347,9 +347,9 @@ class Sudoku(VGroup):
                 for j in useless_list3:
                     self.init_cands_list[i][j].set_opacity(0)   # ？
         self.cands = VGroup(*self.cands_list)
-    
+
         # ------建立基本元素或群组的VGroup------
-    
+
         # 正方形行、列、宫对应的VGroup列表
         self.squares = VGroup(*self.squares_list)
         self.squares.set_plot_depth(-1)
@@ -395,4 +395,50 @@ class Sudoku(VGroup):
         else:
             return 0
 
+# 这个Sudoku子类只是@Acqua为了用于回溯之前视频的数独进度写的一个类，
+# 如果里面的函数有用，可以迁移到之后的类中
+class SudokuWithKnownNum(Sudoku):
+    CONFIG = {
+        'known_num_color':GRAY
+    }
 
+    def __init__(self, **kwargs):
+        Sudoku.__init__(self, **kwargs)
+
+    # 将最初的num_str设置的初始数，一部分改成非提示数的已知数（即填入的数字）
+    def SetKnownNum(self,known_num_str):
+        known_num_str = known_num_str.replace('.', '0')  # 将字符串中的'.'转化'0'
+        for i in range(1, 10):
+            for j in range(1, 10):
+                if int(known_num_str[9 * i + j - 10])==0:
+                    continue
+                elif self.domain_num_list[9 * i + j - 10] == int(known_num_str[9 * i + j - 10]):
+                    pos=self.nums_list[9 * i + j - 10].get_center()
+                    self.nums_list[9 * i + j - 10].become(
+                            SudokuLine(known_num_str[9 * i + j - 10],
+                                plot_depth=2, size=self.num_scale, font='ZCOOL Addict Italic 01',strock_width=4)
+                    )
+                    self.nums_list[9 * i + j - 10].move_to(pos).set_color(self.known_num_color)
+
+
+# 这个Sudoku子类基本上也只是这一期视频会用到
+class SudokuWithTag(SudokuWithKnownNum):
+    def __init__(self, **kwargs):
+        SudokuWithKnownNum.__init__(self, **kwargs)
+        self.tag=VGroup(
+            *[
+                SudokuLine("r" + str(i + 1),size=self.num_scale).next_to(self.rows_v_list[i], LEFT)
+                for i in range(9)
+            ],
+            *[
+                SudokuLine("c" + str(i + 1),size=self.num_scale).next_to(self.cols_v_list[i], UP)
+                for i in range(9)
+            ],
+            *[
+                SudokuLine("b" + str(i + 1),size=self.num_scale).add_background_rectangle(color=WHITE, buff=0.2)\
+                .move_to(self.blocks_v_list[i])
+                for i in range(9)
+            ]
+        )
+        self.tag.set_opacity(0)
+        self.add(self.tag)
